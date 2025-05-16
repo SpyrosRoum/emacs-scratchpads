@@ -54,6 +54,7 @@ This directory is created inside the base-dir.")
   (if-let ((ext (file-name-extension path 't)))
     ;; `string-remove-suffix' is used instead of `file-name-base'
     ;; so that we can handle path-like names without "eating" the path.
+    ;; TODO: Would `file-name-sans-extension' work and be more idiomatic?
     (concat (string-remove-suffix ext path) (format "%s" num) ext)
     (concat path (format "%s" num))))
 
@@ -107,9 +108,47 @@ Returns the resulting buffer object."
         (funcall initial-major-mode))
       buff)))
 
-(defun scratchpad-open (&optional name)
-  (interactive)
-  (message "TODO open"))
+(defun sp--potential-pads (&optional include-projectless)
+  "Return a list of petential scratchpads.
+
+Only scratchpads that belong to the current project are returned by default.
+If `include-projectless' is non-nill then projectless scratchpads are included too.
+If there is no project open then `include-projectless' has no effect as only
+the projectless scratchpads are returned every time."
+  (let*
+    (
+      (scratch-dirs
+        (if-let ((proj (project-current)))
+          (if include-projectless
+            (list (project-name proj) scratchpad-projectless-dir)
+            (list (project-name proj)))
+          (list scratchpad-projectless-dir)))
+      (all-files-expanded
+        (mapcan
+          (lambda (dir-name)
+            (directory-files-recursively
+              (expand-file-name dir-name scratchpad-base-dir)
+              ".*"))
+          scratch-dirs))
+      (all-files-relative
+        (mapcar
+          (lambda (p) (file-relative-name p scratchpad-base-dir))
+          all-files-expanded)))
+    all-files-relative))
+
+(defun scratchpad-open (name)
+  "Open a scratchpad for editing.
+If a prefix argument is given then projectless scratchpads are included
+in the search regardless of if a project is active or not.
+`name' must be a file name relative to `scrtachpad-base-dir'"
+  (interactive
+    (list
+      (completing-read
+        "Select a scratchpad:"
+        (sp--potential-pads current-prefix-arg)
+        nil
+        't)))
+  (find-file (expand-file-name name scratchpad-base-dir)))
 
 (defun scratchpad-delete (&optional name)
   (interactive)
