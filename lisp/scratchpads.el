@@ -71,7 +71,7 @@ includes a dot (`.'), then it's added before the dot."
       (setq name (sp--path-with-num name num)))
     (expand-file-name name dir)))
 
-(defun scratchpad-new (name)
+(defun scratchpad-new (name &optional projectless)
   "Opens a new scratchpad with a name based on the name given.
 If a file already exists with the given name then it's altered by appending
 a number to the end of it, but before the file extension if it exists.
@@ -83,12 +83,20 @@ named `foo.py', the final file name could be `foo2.py'.
 If no extension is given then `initial-major-mode' is used as the mode of the
 file.
 
+If `projectless' is non-nill (a prefix argument is given), then the scratchpad
+will be created as projectless even if there is an active project.
+When there is no active project this argument is ignored.
+
 Returns the resulting buffer object."
-  (interactive (list (read-string "Enter a name:" "scratch")))
+  (interactive
+    (list (read-string "Enter a name:" "scratch") current-prefix-arg))
   (let*
     (
       (scratch-dir
-        (if-let ((proj (project-current)))
+        (if-let
+          (
+            (proj (project-current))
+            (_ (not projectless)))
           (project-name proj)
           scratchpad-projectless-dir))
       (base-dir (expand-file-name scratch-dir scratchpad-base-dir))
