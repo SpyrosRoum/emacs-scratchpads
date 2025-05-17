@@ -72,6 +72,7 @@ includes a dot (`.'), then it's added before the dot."
       (setq name (sp--path-with-num name num)))
     (expand-file-name name dir)))
 
+;;;###autoload
 (defun scratchpad-new (name &optional projectless)
   "Opens a new scratchpad with a name based on the name given.
 If a file already exists with the given name then it's altered by appending
@@ -138,6 +139,7 @@ the projectless scratchpads are returned every time."
           all-files-expanded)))
     all-files-relative))
 
+;;;###autoload
 (defun scratchpad-open (name)
   "Open a scratchpad for editing.
 If a prefix argument is given then projectless scratchpads are included
@@ -157,6 +159,7 @@ in the search regardless of if a project is active or not.
     (when (file-in-directory-p buffer-file-name scratchpad-base-dir)
       (file-relative-name buffer-file-name scratchpad-base-dir))))
 
+;;;###autoload
 (defun scratchpad-delete (name)
   "Delete a scratchpad forever.
 
