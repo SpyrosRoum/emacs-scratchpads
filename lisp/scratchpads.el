@@ -90,7 +90,9 @@ When there is no active project this argument is ignored.
 
 Returns the resulting buffer object."
   (interactive
-    (list (read-string "Enter a name:" "scratch") current-prefix-arg))
+    (list
+      (read-string "Enter a name: " "scratch")
+      current-prefix-arg))
   (let*
     (
       (scratch-dir
@@ -144,7 +146,7 @@ in the search regardless of if a project is active or not.
   (interactive
     (list
       (completing-read
-        "Select a scratchpad:"
+        "Select a scratchpad: "
         (sp--potential-pads current-prefix-arg)
         nil
         't)))
