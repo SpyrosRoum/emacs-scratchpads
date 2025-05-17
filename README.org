@@ -1,0 +1,4 @@
+* Scratchpads
+
+Scratchpads is a tool that helps you handle multiple persistent scratch files
+that are sorted by project.
