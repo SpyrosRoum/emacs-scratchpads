@@ -52,10 +52,7 @@ This directory is created inside the base-dir.")
 (defun sp--path-with-num (path num)
   "Adds the given `num' in the `path', respecting file extensions."
   (if-let ((ext (file-name-extension path 't)))
-    ;; `string-remove-suffix' is used instead of `file-name-base'
-    ;; so that we can handle path-like names without "eating" the path.
-    ;; TODO: Would `file-name-sans-extension' work and be more idiomatic?
-    (concat (string-remove-suffix ext path) (format "%s" num) ext)
+    (concat (file-name-sans-extension path) (format "%s" num) ext)
     (concat path (format "%s" num))))
 
 (defun sp--generate-unique-name (name dir)
