@@ -152,6 +152,34 @@ in the search regardless of if a project is active or not.
         't)))
   (find-file (expand-file-name name scratchpad-base-dir)))
 
-(defun scratchpad-delete (&optional name)
-  (interactive)
-  (message "TODO delete"))
+(defun sp--current-file-if-scratchpad ()
+  (when buffer-file-name
+    (when (file-in-directory-p buffer-file-name scratchpad-base-dir)
+      (file-relative-name buffer-file-name scratchpad-base-dir))))
+
+(defun scratchpad-delete (name)
+  "Delete a scratchpad forever.
+
+Delete a scratchpad related to the current project.
+If a prefix argument is given then projectless scratchpads are
+included as options.
+`name' must be a file name relative to `scratchpad-base-dir'."
+  (interactive
+    (list
+      (completing-read
+        "Select a scratchpad for deletion: "
+        (sp--potential-pads current-prefix-arg)
+        nil
+        't
+        (sp--current-file-if-scratchpad))))
+  (let*
+    (
+      (prompt (format "Are you sure you want to delete %s? " name))
+      (confirmed (yes-or-no-p prompt))
+      (path (expand-file-name name scratchpad-base-dir)))
+    (when confirmed
+      (delete-file path)
+      (when (string= buffer-file-name path)
+        (kill-buffer)))))
+
+(provide 'scratchpads)
