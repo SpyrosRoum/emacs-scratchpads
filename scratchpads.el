@@ -1,9 +1,9 @@
-;; scratchpads.el --- Persistent scratchpad handling  -*- lexical-binding: t -*-
+;;; scratchpads.el --- Persistent scratchpad handling  -*- lexical-binding: t -*-
 
 ;; Author: Spyros Roum <spyros.roum@posteo.net>
 ;; Maintainer: Spyros Roum <spyros.roum@posteo.net>
 ;; Version: 0.1.0
-;; Package-Requires: ((emacs "26.1"))
+;; Package-Requires: ((emacs "29.1"))
 ;; Homepage: https://github.com/SpyrosRoum/emacs-scratchpads
 ;; Keywords: tools
 
@@ -33,29 +33,30 @@
 
 ;;; Code:
 
-(defgroup scratchpad nil
-  "Handle persistent scratchpads by the project.")
+(defgroup scratchpads nil
+  "Handle persistent scratchpads by the project."
+  :group 'tools)
 
-(defcustom scratchpad-base-dir
+(defcustom scratchpads-base-dir
   (expand-file-name "scratches" user-emacs-directory)
   "The base directory for scratchpads.
 A sub-directory is created for each project, along with one
 more for all scratchpads that are created outside of one."
-  :group 'scratchpad)
+  :group 'scratchpads)
 
-(defvar scratchpad-projectless-dir "misc--scratches"
+(defvar scratchpads-projectless-dir "misc--scratches"
   "Directory for projectless scratchpads.
 A \"projectless\" scratchpad is any scratchpad that was created
 outside of any project.
 This directory is created inside the base-dir.")
 
-(defun sp--path-with-num (path num)
-  "Add the given `NUM' in the `PATH', respecting file extensions."
-  (if-let ((ext (file-name-extension path 't)))
-    (concat (file-name-sans-extension path) (format "%s" num) ext)
-    (concat path (format "%s" num))))
+(defun scratchpads--dir-with-num (dir num)
+  "Add the given `NUM' in the `DIR', respecting file extensions."
+  (if-let ((ext (file-name-extension dir 't)))
+    (concat (file-name-sans-extension dir) (format "%s" num) ext)
+    (concat dir (format "%s" num))))
 
-(defun sp--generate-unique-name (name dir)
+(defun scratchpads--generate-unique-name (name dir)
   "Generate a unique name for the scratchpad based on `NAME'.
 Returns an expanded `DIR'+`NAME' which is certain not to exist.
 When the given `NAME' already exists a unique one is generated
@@ -66,7 +67,7 @@ includes a dot (`.'), then it's added before the dot."
   (let ((num 1))
     (while (f-exists? (expand-file-name name dir))
       (setq num (1+ num))
-      (setq name (sp--path-with-num name num)))
+      (setq name (scratchpads--dir-with-num name num)))
     (expand-file-name name dir)))
 
 ;;;###autoload
@@ -99,16 +100,16 @@ Returns the resulting buffer object."
             (proj (project-current))
             (_ (not projectless)))
           (project-name proj)
-          scratchpad-projectless-dir))
-      (base-dir (expand-file-name scratch-dir scratchpad-base-dir))
-      (path (sp--generate-unique-name name base-dir)))
+          scratchpads-projectless-dir))
+      (base-dir (expand-file-name scratch-dir scratchpads-base-dir))
+      (file (scratchpads--generate-unique-name name base-dir)))
     (mkdir base-dir 't)
-    (let ((buff (find-file path)))
+    (let ((buff (find-file file)))
       (when (string= (symbol-name major-mode) "fundamental-mode")
         (funcall initial-major-mode))
       buff)))
 
-(defun sp--potential-pads (&optional include-projectless)
+(defun scratchpads--potential-pads (&optional include-projectless)
   "Return a list of petential scratchpads.
 Only scratchpads that belong to the current project are returned by default.
 When `INCLUDE-PROJECTLESS' is non-nill then projectless scratchpads are included
@@ -121,19 +122,19 @@ the projectless scratchpads are returned every time."
       (scratch-dirs
         (if-let ((proj (project-current)))
           (if include-projectless
-            (list (project-name proj) scratchpad-projectless-dir)
+            (list (project-name proj) scratchpads-projectless-dir)
             (list (project-name proj)))
-          (list scratchpad-projectless-dir)))
+          (list scratchpads-projectless-dir)))
       (all-files-expanded
         (mapcan
           (lambda (dir-name)
             (directory-files-recursively
-              (expand-file-name dir-name scratchpad-base-dir)
+              (expand-file-name dir-name scratchpads-base-dir)
               ".*"))
           scratch-dirs))
       (all-files-relative
         (mapcar
-          (lambda (p) (file-relative-name p scratchpad-base-dir))
+          (lambda (p) (file-relative-name p scratchpads-base-dir))
           all-files-expanded)))
     all-files-relative))
 
@@ -147,18 +148,18 @@ in the search regardless of if a project is active or not.
     (list
       (completing-read
         "Select a scratchpad: "
-        (sp--potential-pads current-prefix-arg)
+        (scratchpads--potential-pads current-prefix-arg)
         nil
         't)))
-  (find-file (expand-file-name name scratchpad-base-dir)))
+  (find-file (expand-file-name name scratchpads-base-dir)))
 
-(defun sp--current-file-if-scratchpad ()
+(defun scratchpads--current-file-if-scratchpad ()
   "Return the name of the current file only if it's a scratchpad.
 When the current file is a scrtachpad,
-its name is returned relative to `scratchpad-base-dir'."
+its name is returned relative to `scratchpads-base-dir'."
   (when buffer-file-name
-    (when (file-in-directory-p buffer-file-name scratchpad-base-dir)
-      (file-relative-name buffer-file-name scratchpad-base-dir))))
+    (when (file-in-directory-p buffer-file-name scratchpads-base-dir)
+      (file-relative-name buffer-file-name scratchpads-base-dir))))
 
 ;;;###autoload
 (defun scratchpad-delete (name)
@@ -166,23 +167,23 @@ its name is returned relative to `scratchpad-base-dir'."
 Delete a scratchpad related to the current project.
 If a prefix argument is given then projectless scratchpads are
 included as options.
-`NAME' must be a file name relative to `scratchpad-base-dir'."
+`NAME' must be a file name relative to `scratchpads-base-dir'."
   (interactive
     (list
       (completing-read
         "Select a scratchpad for deletion: "
-        (sp--potential-pads current-prefix-arg)
+        (scratchpads--potential-pads current-prefix-arg)
         nil
         't
-        (sp--current-file-if-scratchpad))))
+        (scratchpads--current-file-if-scratchpad))))
   (let*
     (
       (prompt (format "Are you sure you want to delete %s? " name))
       (confirmed (yes-or-no-p prompt))
-      (path (expand-file-name name scratchpad-base-dir)))
+      (file (expand-file-name name scratchpads-base-dir)))
     (when confirmed
-      (delete-file path)
-      (when (string= buffer-file-name path)
+      (delete-file file)
+      (when (string= buffer-file-name file)
         (kill-buffer)))))
 
 (provide 'scratchpads)
