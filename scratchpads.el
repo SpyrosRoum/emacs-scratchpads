@@ -50,6 +50,17 @@ A \"projectless\" scratchpad is any scratchpad that was created
 outside of any project.
 This directory is created inside the base-dir.")
 
+(defun scratchpads--project-name ()
+  "Get the current project's name or nil.
+If projectile is available then it's used to get the current project,
+otherwise project.el is used."
+  (if-let ((_ (functionp 'projectile-project-name))
+	   (name (projectile-project-name)))
+      (when (not (string= name "-"))
+	name)
+    (when-let ((proj (project-current)))
+      (project-name proj))))
+
 (defun scratchpads--dir-with-num (dir num)
   "Add the given `NUM' in the `DIR', respecting file extensions."
   (if-let ((ext (file-name-extension dir 't)))
@@ -97,9 +108,9 @@ Returns the resulting buffer object."
       (scratch-dir
         (if-let
           (
-            (proj (project-current))
+            (project-name (scratchpads--project-name))
             (_ (not projectless)))
-          (project-name proj)
+          project-name
           scratchpads-projectless-dir))
       (base-dir (expand-file-name scratch-dir scratchpads-base-dir))
       (file (scratchpads--generate-unique-name name base-dir)))
@@ -120,10 +131,10 @@ the projectless scratchpads are returned every time."
   (let*
     (
       (scratch-dirs
-        (if-let ((proj (project-current)))
+        (if-let ((project-name (scratchpads--project-name)))
           (if include-projectless
-            (list (project-name proj) scratchpads-projectless-dir)
-            (list (project-name proj)))
+            (list project-name scratchpads-projectless-dir)
+            (list project-name))
           (list scratchpads-projectless-dir)))
       (all-files-expanded
         (mapcan
