@@ -50,15 +50,15 @@ outside of any project.
 This directory is created inside the base-dir.")
 
 (defun sp--path-with-num (path num)
-  "Adds the given `num' in the `path', respecting file extensions."
+  "Add the given `NUM' in the `PATH', respecting file extensions."
   (if-let ((ext (file-name-extension path 't)))
     (concat (file-name-sans-extension path) (format "%s" num) ext)
     (concat path (format "%s" num))))
 
 (defun sp--generate-unique-name (name dir)
-  "Generate a unique name for the scratchpad.
-Returns the expanded dir+name which is certain not to exist.
-When the given name already exists a unique one is generated
+  "Generate a unique name for the scratchpad based on `NAME'.
+Returns an expanded `DIR'+`NAME' which is certain not to exist.
+When the given `NAME' already exists a unique one is generated
 by appending a number starting from 2, until one that doesn't
 exist is found.
 The number is appended at the end of the name unless it
@@ -71,7 +71,7 @@ includes a dot (`.'), then it's added before the dot."
 
 ;;;###autoload
 (defun scratchpad-new (name &optional projectless)
-  "Opens a new scratchpad with a name based on the name given.
+  "Opens a new scratchpad with a name based on `NAME'.
 If a file already exists with the given name then it's altered by appending
 a number to the end of it, but before the file extension if it exists.
 The number starts from `2' and increments until a unique file name is found.
@@ -82,7 +82,7 @@ named `foo.py', the final file name could be `foo2.py'.
 If no extension is given then `initial-major-mode' is used as the mode of the
 file.
 
-If `projectless' is non-nill (a prefix argument is given), then the scratchpad
+If `PROJECTLESS' is non-nill (a prefix argument is given), then the scratchpad
 will be created as projectless even if there is an active project.
 When there is no active project this argument is ignored.
 
@@ -110,9 +110,10 @@ Returns the resulting buffer object."
 
 (defun sp--potential-pads (&optional include-projectless)
   "Return a list of petential scratchpads.
-
 Only scratchpads that belong to the current project are returned by default.
-If `include-projectless' is non-nill then projectless scratchpads are included too.
+When `INCLUDE-PROJECTLESS' is non-nill then projectless scratchpads are included
+in the results, otherwise only scratchpads related to the current project
+are returned.
 If there is no project open then `include-projectless' has no effect as only
 the projectless scratchpads are returned every time."
   (let*
@@ -141,7 +142,7 @@ the projectless scratchpads are returned every time."
   "Open a scratchpad for editing.
 If a prefix argument is given then projectless scratchpads are included
 in the search regardless of if a project is active or not.
-`name' must be a file name relative to `scrtachpad-base-dir'"
+`NAME' must be a file name relative to `scrtachpad-base-dir'"
   (interactive
     (list
       (completing-read
@@ -152,6 +153,9 @@ in the search regardless of if a project is active or not.
   (find-file (expand-file-name name scratchpad-base-dir)))
 
 (defun sp--current-file-if-scratchpad ()
+  "Return the name of the current file only if it's a scratchpad.
+When the current file is a scrtachpad,
+its name is returned relative to `scratchpad-base-dir'."
   (when buffer-file-name
     (when (file-in-directory-p buffer-file-name scratchpad-base-dir)
       (file-relative-name buffer-file-name scratchpad-base-dir))))
@@ -159,11 +163,10 @@ in the search regardless of if a project is active or not.
 ;;;###autoload
 (defun scratchpad-delete (name)
   "Delete a scratchpad forever.
-
 Delete a scratchpad related to the current project.
 If a prefix argument is given then projectless scratchpads are
 included as options.
-`name' must be a file name relative to `scratchpad-base-dir'."
+`NAME' must be a file name relative to `scratchpad-base-dir'."
   (interactive
     (list
       (completing-read
@@ -183,3 +186,5 @@ included as options.
         (kill-buffer)))))
 
 (provide 'scratchpads)
+
+;;; scratchpads.el ends here
