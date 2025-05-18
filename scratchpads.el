@@ -26,7 +26,7 @@
 
 ;;; Commentary:
 
-;; Scratchapads helps you handle multiple persistant scratch files
+;; Scratchpads helps you handle multiple persistant scratch files
 ;; on a project-by-project or global basis.
 ;; This can be useful for anything from jotting some quick notes down,
 ;; to writing API calls for your project with Org mode and Verb.
