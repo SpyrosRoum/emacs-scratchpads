@@ -1,4 +1,44 @@
-* Scratchpads
+* Scratchpads for emacs
 
-Scratchpads is a tool that helps you handle multiple persistent scratch files
-that are sorted by project.
+Manage project-specific and global scratch files with ease.
+
+#+HTML: <img alt="License" src="https://img.shields.io/github/license/spyrosroum/emacs-scratchpads">
+
+** Overview
+~scratchpads~ enhances Emacs by letting you create and manage multiple
+scratch files tied to specific projects or kept globally.
+Say goodbye to losing notes or quick scripts from the *scratch* buffer
+when closing emacs. Save experiments, notes, and snippets efficiently.
+
+** Features
++ Project-specific or global scratchpads: Create scratch files tied to your current project or accessible anywhere.
++ Simple commands: Create, open, or delete scratchpads with intuitive prompts.
++ Automatic organization: Scratchpads are persisted as files for later access.
+
+** Installation
+NOTE: Scratchpads is not yet available in any repository so you will
+have to manually add it to your load-path.
+
+#+begin_src elisp
+  (use-package scratchpads
+    :bind (("C-c s n" . scratchpad-new)
+           ("C-c s o" . scratchpad-open)
+           ("C-c s d" . scratchpad-delete))
+    ;; Just until it's in melpa, we need to specify its local path
+    :load-path "~/path/to/scratchpads"
+    :custom
+    ;; Optional: Change where scratchpads are saved.
+    (scratchpads-base-dir "~/some/dir"))
+  #+end_src
+
+** Usage
+| Command           | Description                                                                                    |
+|-------------------+------------------------------------------------------------------------------------------------|
+| scrtachpad-new    | Create a new scratchpad tied to the current project (if any). Use C-u to make it global.       |
+| scratchpad-open   | Open an existing scratchpad from the current project (if any). Use C-u to include global pads. |
+| scratchpad-delete | Delete a scratchpad from the current project (if any). Use C-u to include global pads.         |
+
+** Customization
+~scratchpads-base-dir~ is used to control where scratchpads are saved.
+It defaults to a directory named ~scratches~ inside of ~user-emacs-directory~
+but it can be customized.
