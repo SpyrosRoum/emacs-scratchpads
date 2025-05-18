@@ -42,7 +42,8 @@
   "The base directory for scratchpads.
 A sub-directory is created for each project, along with one
 more for all scratchpads that are created outside of one."
-  :group 'scratchpads)
+  :group 'scratchpads
+  :type '(directory))
 
 (defvar scratchpads-projectless-dir "misc--scratches"
   "Directory for projectless scratchpads.
