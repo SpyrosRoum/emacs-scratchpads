@@ -17,16 +17,41 @@ when closing emacs. Save experiments, notes, and snippets efficiently.
 + Projectile and project.el support: If projectile is available then it's used for project info, otherwise project.el is used instead.
 
 ** Installation
-NOTE: Scratchpads is not yet available in any repository so you will
-have to manually add it to your load-path.
+Scratchpads is not yet available in any repository, that means you will either have to
+use a package manager that can fetch from github, or you have to do it manually and add it to
+your load-path.
 
+*** Using use-package with straight.el
 #+begin_src elisp
+  (use-package
+    scratchpads
+    :straight
+    (scratchpads
+      :type git
+      :host github
+      :repo "SpyrosRoum/emacs-scratchpads")
+    :bind
+    (("C-c s n" . scratchpad-new)
+      ("C-c s o" . scratchpad-open)
+      ("C-c s d" . scratchpad-delete))
+    :custom
+    ;; Optional: Change where scratchpads are saved.
+    (scratchpads-base-dir "~/some/dir"))
+  #+end_src
+
+*** Using git to clone it locally and use-package
+First clone it locally:
+#+begin_src bash
+  $ git clone https://github.com/SpyrosRoum/emacs-scratchpads.git
+  #+end_src
+
+And then in your config:
+  #+begin_src elisp
   (use-package scratchpads
+    :load-path "~/path/to/emacs-scratchpads"
     :bind (("C-c s n" . scratchpad-new)
            ("C-c s o" . scratchpad-open)
            ("C-c s d" . scratchpad-delete))
-    ;; Just until it's in melpa, we need to specify its local path
-    :load-path "~/path/to/scratchpads"
     :custom
     ;; Optional: Change where scratchpads are saved.
     (scratchpads-base-dir "~/some/dir"))
